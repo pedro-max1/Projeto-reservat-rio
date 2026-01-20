@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Autônomo de Medição de Nível</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#0f172a;
+}
+
+.app{
+  display:grid;
+  grid-template-columns:420px 1fr;
+  height:100vh;
+}
+
+.painel{
+  background:white;
+  padding:25px;
+}
+
+.visual{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.reservatorio{
+  position:relative;
+  width:300px;
+  height:420px;
+  border:6px solid gray;
+  border-radius:20px;
+  overflow:hidden;
+  background:#eee;
+}
+
+.agua{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:0%;
+  background:linear-gradient(to top,#0288d1,#4fc3f7);
+  transition:height .6s;
+}
+
+.termometro{
+  width:30px;
+  height:420px;
+  background:#ddd;
+  border-radius:15px;
+  margin-left:25px;
+  position:relative;
+  overflow:hidden;
+}
+
+.termometro-fill{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:0%;
+  background:green;
+  transition:.6s;
+}
+
+.info-nivel{
+  text-align:center;
+  margin-top:20px;
+  font-size:22px;
+  font-weight:bold;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<div class="painel">
+<h2>Sistema IoT — Nível de Água</h2>
+<p>Atualização automática via ESP8266</p>
+</div>
+
+<div class="visual">
+<div style="display:flex;align-items:center;">
+<div class="reservatorio">
+<div class="agua" id="agua"></div>
+</div>
+
+<div class="termometro">
+<div class="termometro-fill" id="termometro"></div>
+</div>
+</div>
+
+<div class="info-nivel" id="infoNivel">Carregando...</div>
+</div>
+
+</div>
+
+<script>
+const ipESP = "http://IP_ESP8266/dados";
+
+async function medirNivel(){
+  try{
+    const r = await fetch(ipESP);
+    const dados = await r.json();
+
+    const litros = dados.litros;
+    const percentual = dados.percentual;
+
+    document.getElementById("agua").style.height = percentual+"%";
+    document.getElementById("termometro").style.height = percentual+"%";
+
+    let estado="Bom";
+    let cor="green";
+
+    if(litros<=3){estado="Crítico";cor="red";}
+    else if(litros<=6){estado="Baixo";cor="orange";}
+    else if(litros<=10){estado="Razoável";cor="#fbc02d";}
+    else if(litros<=16){estado="Bom";cor="green";}
+    else{estado="Cheio";cor="#0288d1";}
+
+    document.getElementById("termometro").style.background=cor;
+    document.getElementById("infoNivel").innerText=
+      `Nível atual: ${litros} L — ${estado}`;
+
+  }catch(e){
+    document.getElementById("infoNivel").innerText="Sem conexão com ESP";
+  }
+}
+
+setInterval(medirNivel,5000);
+medirNivel();
+</script>
+
+</body>
+</html>
