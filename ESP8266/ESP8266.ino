@@ -2,8 +2,8 @@
 #include <ESP8266WebServer.h>
 
 /* ===== WIFI ===== */
-const char* ssid = "Nome da Rede";
-const char* password = "Senha da Rede";
+const char* ssid = "iPhone de Pedro";
+const char* password = "01235476Pp#";
 
 /* ===== PINOS NODEMCU ===== */
 #define TRIGPIN 14   // D5
